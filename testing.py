@@ -1,14 +1,10 @@
 import asyncio
 
-from threading import Timer
-
-from datetime import timedelta
 from flask import Flask
 from bleak import discover, BleakClient
 
 app = Flask(__name__)
 
-__PWR_SERVICE        = "00001523-1212-efde-1523-785feabcd124"
 __PWR_CHARACTERISTIC = "00001525-1212-efde-1523-785feabcd124"
 __PWR_ON             = bytearray([0x01])
 __PWR_STANDBY        = bytearray([0x00])
@@ -20,8 +16,13 @@ async def all_on():
 	global found_devices
 	count = 0
 	for mac in found_devices:
-		await set_power_state(mac, True)
-		count += 1
+		for i in range(0, 3):
+			try:
+				await set_power_state(mac, True)
+				count += 1
+				break
+			except:
+				print("Failed to send data")
 	return {
 		"success": True,
 		"device_count": count
@@ -33,8 +34,13 @@ async def all_off():
 	count = 0
 	print(found_devices)
 	for mac in found_devices:
-		await set_power_state(mac, False)
-		count += 1
+		for i in range(0, 3):
+			try:
+				await set_power_state(mac, False)
+				count += 1
+				break
+			except:
+				print("Failed to send data")
 	return {
 		"success": True,
 		"device_count": count
@@ -84,4 +90,4 @@ def perform_scan():
 if __name__ == "__main__":
 	perform_scan()
 
-	app.run(debug=False, host="0.0.0.0", port=8080)
+	app.run(debug=False, host="0.0.0.0", port=8030)
